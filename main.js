@@ -1,4 +1,4 @@
-       // ===== التهيئة الأساسية =====
+     // ===== التهيئة الأساسية =====
         document.addEventListener('DOMContentLoaded', function() {
             // تحديث سنة حقوق النشر
             document.getElementById('currentYear').textContent = new Date().getFullYear();
@@ -9,6 +9,8 @@
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
             const navMenu = document.getElementById('navMenu');
             const themeSwitch = document.getElementById('checkbox');
+            const mainServiceCards = document.querySelectorAll('.main-service-card');
+            const exploreBtn = document.querySelector('.btn[href="#main-services"]');
             
             // ===== Dark/Light Mode =====
             function initializeTheme() {
@@ -75,6 +77,27 @@
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
                     const sectionId = link.getAttribute('data-section');
+                    
+                    // إظهار القسم المحدد
+                    showSection(sectionId);
+                    
+                    // تحديث حالة الرابط النشط
+                    setActiveNavLink(sectionId);
+                    
+                    // تحديث localStorage
+                    updateLocalStorage(sectionId);
+                    
+                    // إغلاق القائمة المتنقلة على الأجهزة الصغيرة فقط
+                    if (window.innerWidth <= 768) {
+                        closeMobileMenu();
+                    }
+                });
+            });
+            
+            // ===== أحداث بطاقات الخدمات الرئيسية =====
+            mainServiceCards.forEach(card => {
+                card.addEventListener('click', (e) => {
+                    const sectionId = card.getAttribute('data-section');
                     
                     // إظهار القسم المحدد
                     showSection(sectionId);
@@ -275,7 +298,7 @@
                 }
                 
                 // إضافة تأثيرات على العناصر عند الظهور
-                const serviceCards = document.querySelectorAll('.service-card, .qr-service-card, .work-item');
+                const serviceCards = document.querySelectorAll('.service-card, .qr-service-card, .work-item, .main-service-card');
                 serviceCards.forEach(card => {
                     const cardPosition = card.getBoundingClientRect().top;
                     const screenPosition = window.innerHeight / 1.2;
@@ -309,7 +332,7 @@
                 });
                 
                 // إعداد تأثيرات على العناصر
-                const animatedElements = document.querySelectorAll('.service-card, .qr-service-card, .work-item');
+                const animatedElements = document.querySelectorAll('.service-card, .qr-service-card, .work-item, .main-service-card');
                 animatedElements.forEach((element, index) => {
                     element.style.opacity = '0';
                     element.style.transform = 'translateY(30px)';
@@ -329,4 +352,32 @@
                     img.classList.add('loaded');
                 }
             });
+            
+            // ===== تعديل زر استكشاف الخدمات =====
+            if (exploreBtn) {
+                exploreBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    // إذا كنا في الصفحة الرئيسية، انزل لقسم الخدمات
+                    const currentSection = document.querySelector('.section.active');
+                    if (currentSection && currentSection.id === 'home') {
+                        document.getElementById('main-services').scrollIntoView({ 
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    } else {
+                        // إذا كنا في قسم آخر، ارجع للرئيسية ثم انزل للخدمات
+                        showSection('home');
+                        setActiveNavLink('home');
+                        updateLocalStorage('home');
+                        
+                        setTimeout(() => {
+                            document.getElementById('main-services').scrollIntoView({ 
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }, 500);
+                    }
+                });
+            }
         });
